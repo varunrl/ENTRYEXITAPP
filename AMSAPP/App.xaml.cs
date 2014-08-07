@@ -47,7 +47,7 @@ namespace AMSAPP
 
         private void CustomStartUp()
         {
-
+            MyDataContext.ClearEventLogs();
             MyDataContext.AddComputerEvent(new AMSAPP.ComputerEvent { EventOn = DateTime.Now, EventType = SessionSwitchReason.SessionLogon.ToString() });
             
            
@@ -70,6 +70,7 @@ namespace AMSAPP
 
         public void LoadData()
         {
+           
             this.MainWindow.Cursor = Cursors.Wait;
             try
             {
@@ -84,7 +85,7 @@ namespace AMSAPP
                     Logger.Log(exception.StackTrace);
                 }
 
-                if (accessEvent.EventOn != null)
+                if (accessEvent.EventOn > DateTime.Now.Date)
                 {
                     var rowCount = MyDataContext.AMSEvents.Where(x => x.EventType == accessEvent.EventType && x.EventOn == accessEvent.EventOn && x.ElapsedTimeTxt == accessEvent.ElapsedTimeTxt).Count();
                     if (rowCount == 0)

@@ -114,6 +114,27 @@ namespace AMSAPP
             }
     
         }
+
+        public void ClearEventLogs()
+         {
+             SqlCeConnection conn = null;
+             using (conn = new SqlCeConnection(ConnectionString))
+             {
+                 conn.Open();
+
+                 SqlCeCommand cmd = conn.CreateCommand();
+                 cmd.CommandText = "Delete  from AMSEvents where EventOn < '"+ DateTime.Now.ToString("yyyy-MM-dd") + "'" ;
+
+                 cmd.ExecuteNonQuery();
+
+                 cmd.CommandText = "Delete  from ComputerEvents where EventOn < '" + DateTime.Now.ToString("yyyy-MM-dd") + "'";
+
+                 cmd.ExecuteNonQuery();
+
+                 // Close the connection
+                 conn.Close();
+             }
+         }
     }
 
     public class Reflection
