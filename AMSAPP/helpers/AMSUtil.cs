@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Net;
 using HtmlAgilityPack;
+using System.Collections.Generic;
 
 namespace AMSAPP
 {
@@ -125,5 +126,47 @@ namespace AMSAPP
 
             return res;
         }
+
+
+        public static string LoadName(HtmlDocument html)
+        {
+            var headerNode = html.DocumentNode.SelectSingleNode("//td[@class='dxrpHeader_DevEx']");
+            if (headerNode != null)
+            {
+                var nameNode = headerNode.SelectSingleNode(".//span");
+                if (nameNode != null)
+                {
+                    if (!string.IsNullOrWhiteSpace(nameNode.InnerText))
+                    {
+                        return nameNode.InnerText.Replace("Attendance :", "");
+                    }
+                }
+            }
+            return null;
+        }
+
+        public static List<string> GetMonthNames(HtmlDocument html)
+        {
+             
+            try
+            {
+                var monthList = new List<string>();
+                var monthNodes = html.DocumentNode.SelectNodes("//td[@class='dxeCalendarHeader_DevEx']");
+
+                foreach (var monthNode in monthNodes)
+                {
+                    var month = monthNode.SelectSingleNode(".//span").InnerText;
+                    monthList.Add(month);
+                }
+                Logger.Log("Loaded Months " + monthList.Count);
+                return monthList;
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(ex);
+                return null;
+            }
+        }
+        
     }
 }

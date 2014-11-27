@@ -25,7 +25,7 @@ namespace AMSAPP.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://ams.ey.net/WhereIsHe.aspx")]
         public string AMSWhereAMI {
             get {
                 return ((string)(this["AMSWhereAMI"]));
@@ -34,7 +34,7 @@ namespace AMSAPP.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://ams.ey.net/AttendanceCalendar.aspx")]
         public string AMSCalendar {
             get {
                 return ((string)(this["AMSCalendar"]));
@@ -67,7 +67,7 @@ namespace AMSAPP.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://gteeurope.ey.net/Timesheets/TimesheetHome.aspx")]
         public string TimesheetUrl {
             get {
                 return ((string)(this["TimesheetUrl"]));

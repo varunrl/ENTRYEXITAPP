@@ -2,8 +2,10 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="AMS App" Height="641" Width="550" Unloaded="Window_Unloaded" xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+                      xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
         GlowBrush="{DynamicResource AccentColorBrush}" ResizeMode="NoResize" Loaded="MetroWindow_Loaded"              
                       >
+
     <controls:MetroContentControl>
         <TabControl>
             <TabItem Header="Summary">
@@ -14,7 +16,11 @@
                         <RowDefinition Height="534*"/>
                     </Grid.RowDefinitions>
                     <ComboBox x:Name="cbMonths" HorizontalAlignment="Left" Margin="10,8,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="cbMonths_SelectionChanged" Height="26" Grid.Row="1"/>
-                    <DataGrid x:Name="monthDataGrid" HorizontalAlignment="Left" Margin="24,29,0,0" VerticalAlignment="Top" Height="450" Width="497"  IsReadOnly="True" Grid.Row="2" AutoGeneratingColumn="monthDataGrid_AutoGeneratingColumn" LoadingRow="monthDataGrid_LoadingRow"  />
+                    <DataGrid x:Name="monthDataGrid" HorizontalAlignment="Left" Margin="24,29,0,0" VerticalAlignment="Top" Height="450" Width="497"  IsReadOnly="True" Grid.Row="2" AutoGeneratingColumn="monthDataGrid_AutoGeneratingColumn" LoadingRow="monthDataGrid_LoadingRow" MouseDoubleClick="monthDataGrid_MouseDoubleClick" >
+                        
+                     
+                    </DataGrid>
+                   
                     <Label x:Name="lblAverage" Content="00:00:00" HorizontalAlignment="Left" Margin="67,8,0,0" VerticalAlignment="Top" Width="73" Height="26" FontWeight="Bold" FontSize="14"/>
                     <Label Content="Average : " HorizontalAlignment="Left" Margin="4,8,0,0" VerticalAlignment="Top" Height="26" Width="63"/>
                     <Label Content="Total Days : " HorizontalAlignment="Left" Margin="141,8,0,0" VerticalAlignment="Top" Height="26" Width="74"/>

@@ -13,7 +13,12 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using HtmlAgilityPack;
 using MahApps.Metro.Controls;
-
+using System.Windows.Input;
+using MahApps.Metro.Controls.Dialogs;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Collections.ObjectModel;
+using AMSAPP.models;
 
 
 namespace AMSAPP
@@ -24,7 +29,7 @@ namespace AMSAPP
     public partial class Summary : MetroWindow
     {
         private HtmlDocument doc = new HtmlDocument();
-        
+        private ItemsChangeObservableCollection<SummaryGridRow> obsSummaryGrid;
       
 
         public Summary()
@@ -79,18 +84,13 @@ namespace AMSAPP
         {
             try
             {
-                var headerNode = doc.DocumentNode.SelectSingleNode("//td[@class='dxrpHeader_DevEx']");
-                if (headerNode != null)
-                { 
-                    var nameNode = headerNode.SelectSingleNode(".//span");
-                    if (nameNode != null)
-                    {
-                        if (!string.IsNullOrWhiteSpace(nameNode.InnerText))
-                        {
-                            this.Title =  nameNode.InnerText.Replace("Attendance :", "");
-                        }
-                    }
+                string name = AMSUtil.LoadName(doc);
+                if (!String.IsNullOrWhiteSpace(name))
+                {
+                    this.Title = name;
                 }
+               
+                    
             }
             catch (Exception ex)
             {
@@ -134,7 +134,7 @@ namespace AMSAPP
                 var data = wc.DownloadString(new Uri(Properties.Settings.Default.AMSCalendar));
                 Logger.Log("Data Downloaded from " + Properties.Settings.Default.AMSCalendar);              
                 doc.LoadHtml(data);
-                var monthList = GetMonthNames();
+                var monthList = AMSUtil.GetMonthNames(doc);
                 cbMonths.ItemsSource = monthList;
                 cbMonths.SelectedIndex = monthList.Count - 1;
             }
@@ -144,27 +144,7 @@ namespace AMSAPP
             }
         }
 
-        private List<string> GetMonthNames()
-        {
-            try
-            {
-                var monthList = new List<string>();
-                var monthNodes = doc.DocumentNode.SelectNodes("//td[@class='dxeCalendarHeader_DevEx']");
-
-                foreach (var monthNode in monthNodes)
-                {
-                    var month = monthNode.SelectSingleNode(".//span").InnerText;
-                    monthList.Add(month);
-                }
-                Logger.Log("Loaded Months " + monthList.Count());
-                return monthList;
-            }
-            catch (Exception ex)
-            {
-                Logger.Log(ex);
-                return null;
-            }
-        }
+       
 
         private void cbMonths_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -175,86 +155,93 @@ namespace AMSAPP
 
                 string month = comboBox.SelectedItem as string;
                 Logger.Log("Selected Month " + month);
-                var monthNode = GetMonthNode(month);
-
-                var year = Convert.ToInt32(month.Split(',')[1]);
-                Logger.Log("Year = " + year);
-                var iMonth = DateTime.ParseExact(month.Split(',')[0], "MMMM", CultureInfo.InvariantCulture).Month;
-                Logger.Log("MonthNumber = " + iMonth);
-
-                if (monthNode != null)
-                {
-                    var monthGrid = monthNode.ParentNode.NextSibling.SelectSingleNode(".//td[@class='dxMonthGrid']");
-                    if (monthGrid == null)
-                    {
-                        Logger.Log("monthGrid is null");
-                    }
-                    else
-                    {
-                        Logger.Log("monthGrid is not null");
-                    }
-                    var tds = monthGrid.SelectNodes(string.Format(".//*[contains(@class,'{0}')]", "dxeCalendarDay_DevEx"));
-
-                    Logger.Log("Days found in monthGrid : " + tds.Count());
-                    var dayLogs = new List<DayLog>();
-                    foreach (var td in tds)
-                    {
-                        int day;
-                        if (td.Attributes["Class"] != null && td.Attributes["Class"].Value.Contains("dxeCalendarOtherMonth_DevEx"))
-                        {
-                            Logger.Log("skipping other month date : " + td.InnerText);
-                            continue;
-                        }
-
-                        if (Int32.TryParse(td.InnerText, out day))
-                        {
-                            if (td.Attributes["Class"] != null && td.Attributes["Class"].Value.Contains("dxeCalendarToday_DevEx"))
-                            {
-                                dayLogs.Add(new DayLog
-                                            {
-                                                Day = day,
-                                                Title = "",
-                                                Class = td.Attributes["Class"] != null ? td.Attributes["Class"].Value : "",
-                                                Color = td.Attributes["bgcolor"] != null ? td.Attributes["bgcolor"].Value : "white",
-                                                WeekDay = (new DateTime(year, iMonth, day)).DayOfWeek.ToString()
-                                            }
-
-                                        );
-                                Logger.Log("Added Today");
-                            }
-                            else
-                            {
-                                dayLogs.Add(new DayLog
-                                {
-                                    Day = day,
-                                    Title = td.Attributes["Title"] != null ? td.Attributes["Title"].Value : "",
-                                    Class = td.Attributes["Class"] != null ? td.Attributes["Class"].Value : "",
-                                    Color = td.Attributes["bgcolor"] != null ? td.Attributes["bgcolor"].Value : "white",
-                                    WeekDay = (new DateTime(year, iMonth, day)).DayOfWeek.ToString()
-                                }
-
-
-                                        );
-                                Logger.Log("Added DayLog " + day);
-                            }
-                        }
-                        else
-                        {
-                            Logger.Log("Can not parse to integer : " + td.InnerText);
-                        }
-                    }
-                     Logger.Log("dayLogs count" + dayLogs.Count());
-                    var displayList = dayLogs.Select(x => GetGridValue(x)).ToList();
-                    Logger.Log("displayList count" + displayList.Count());
-                    monthDataGrid.ItemsSource = displayList;
-                    ShowAverage(dayLogs);
-
-                    Logger.Log("completed month selection change");
-                }
+                LoadMonthGrid(month);
             }
             catch (Exception ex)
             {
                 Logger.Log(ex);
+            }
+        }
+
+        private void LoadMonthGrid(string month)
+        {
+            var monthNode = GetMonthNode(month);
+
+            var year = Convert.ToInt32(month.Split(',')[1]);
+            Logger.Log("Year = " + year);
+            var iMonth = DateTime.ParseExact(month.Split(',')[0], "MMMM", CultureInfo.InvariantCulture).Month;
+            Logger.Log("MonthNumber = " + iMonth);
+
+            if (monthNode != null)
+            {
+                var monthGrid = monthNode.ParentNode.NextSibling.SelectSingleNode(".//td[@class='dxMonthGrid']");
+                if (monthGrid == null)
+                {
+                    Logger.Log("monthGrid is null");
+                }
+                else
+                {
+                    Logger.Log("monthGrid is not null");
+                }
+                var tds = monthGrid.SelectNodes(string.Format(".//*[contains(@class,'{0}')]", "dxeCalendarDay_DevEx"));
+
+                Logger.Log("Days found in monthGrid : " + tds.Count());
+                var dayLogs = new List<DayLog>();
+                foreach (var td in tds)
+                {
+                    int day;
+                    if (td.Attributes["Class"] != null && td.Attributes["Class"].Value.Contains("dxeCalendarOtherMonth_DevEx"))
+                    {
+                        Logger.Log("skipping other month date : " + td.InnerText);
+                        continue;
+                    }
+
+                    if (Int32.TryParse(td.InnerText, out day))
+                    {
+                        if (td.Attributes["Class"] != null && td.Attributes["Class"].Value.Contains("dxeCalendarToday_DevEx"))
+                        {
+                            dayLogs.Add(new DayLog
+                            {
+                                Day = day,
+                                Title = "",
+                                Class = td.Attributes["Class"] != null ? td.Attributes["Class"].Value : "",
+                                Color = td.Attributes["bgcolor"] != null ? td.Attributes["bgcolor"].Value : "white",
+                                WeekDay = (new DateTime(year, iMonth, day)).DayOfWeek.ToString()
+                            }
+
+                                    );
+                            Logger.Log("Added Today");
+                        }
+                        else
+                        {
+                            dayLogs.Add(new DayLog
+                            {
+                                Day = day,
+                                Title = td.Attributes["Title"] != null ? td.Attributes["Title"].Value : "",
+                                Class = td.Attributes["Class"] != null ? td.Attributes["Class"].Value : "",
+                                Color = td.Attributes["bgcolor"] != null ? td.Attributes["bgcolor"].Value : "white",
+                                WeekDay = (new DateTime(year, iMonth, day)).DayOfWeek.ToString()
+                            }
+
+
+                                    );
+                            Logger.Log("Added DayLog " + day);
+                        }
+                    }
+                    else
+                    {
+                        Logger.Log("Can not parse to integer : " + td.InnerText);
+                    }
+                }
+                Logger.Log("dayLogs count" + dayLogs.Count());
+                var displayList = dayLogs.Select(x => GetGridValue(x)).ToList();
+                Logger.Log("displayList count" + displayList.Count());
+
+                obsSummaryGrid = new ItemsChangeObservableCollection<SummaryGridRow>(displayList);
+                monthDataGrid.ItemsSource = obsSummaryGrid;
+                ShowAverage(dayLogs);
+
+                Logger.Log("completed month selection change");
             }
         }
 
@@ -288,18 +275,7 @@ namespace AMSAPP
             return new SummaryGridRow { WeekDay = dayLog.WeekDay, Day = dayLog.Day, Duration = duration, Comments = comment, Color = dayLog.Color };
         }
 
-        public class SummaryGridRow 
-        {
-            public string WeekDay { get; set; }
-
-            public int Day { get; set; }
-
-            public string Duration { get; set; }
-
-            public string Comments { get; set; }
-
-            public string Color { get; set; }
-        }
+       
 
         private void ShowAverage(List<DayLog> dayLogs)
         {
@@ -380,20 +356,7 @@ namespace AMSAPP
             return null;
         }
 
-        private class DayLog
-        {
-            public int Day { get; set; }
-
-            public string WeekDay { get; set; }
-
-            public string Title { get; set; }
-
-            public string Class { get; set; }
-
-            public string Color { get; set; }
-
-
-        }
+       
 
         private void MySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
@@ -630,6 +593,28 @@ namespace AMSAPP
             Properties.Settings.Default.MinTimeSpan = (int)slider.Value;
             MySlider.Value = Properties.Settings.Default.MinTimeSpan;
             Properties.Settings.Default.Save();
+
+        }
+
+
+        private async void monthDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (monthDataGrid.SelectedItem == null) return;
+            var selectedPerson = monthDataGrid.SelectedItem as SummaryGridRow;
+            //await this.ShowMessageAsync("This is the title", "Some message");
+            //var dialog = (BaseMetroDialog)this.Resources["SimpleDialogTest"];
+            
+            //await this.ShowMetroDialogAsync(dialog);
+
+            var result = await this.ShowInputAsync("Hello!", "Comments : ");
+
+            if (result != null)
+            {
+
+                obsSummaryGrid.Single(x => x.Day == selectedPerson.Day).Comments = result;
+                
+            }
+                
 
         }
 
