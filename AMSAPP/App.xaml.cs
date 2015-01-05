@@ -66,6 +66,33 @@ namespace AMSAPP
         private void AMSLoadTimer_Tick(object sender, EventArgs e)
         {
             LoadData();
+            
+        }
+
+        private void TimsheetAlert()
+        {
+            var result = AMSUtil.CheckTimesheet();
+             try
+                {
+                if (result == TimeSheetStatus.None)
+                {
+
+                    this.notifyIcon.ShowBalloonTip("TimeSheet", "Please submit Timesheet", notifyIcon.Icon);       
+               
+                }
+                else if (result == TimeSheetStatus.Draft)
+                {
+                    this.notifyIcon.ShowBalloonTip("TimeSheet", "Time Sheet in draft. Please submit", notifyIcon.Icon); 
+                }
+                else if (result == TimeSheetStatus.Submitted)
+                {
+                    
+                }
+             }
+             catch (Exception ex)
+             {
+                 Logger.Log(ex.StackTrace);
+             }
         }
 
         public void LoadData()
@@ -97,7 +124,7 @@ namespace AMSAPP
                 }
 
                 SyncWithComputerEvents();
-
+                TimsheetAlert();
             }
             catch (Exception exception)
             {

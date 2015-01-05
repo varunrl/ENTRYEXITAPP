@@ -16,6 +16,16 @@ namespace AMSAPP
 
     }
 
+    public enum TimeSheetStatus
+    {
+        None = 0,
+        Draft = 1,
+        Submitted = 2
+
+    }
+
+    
+
     internal static class AMSUtil
     {
         #region LastEventData
@@ -97,6 +107,40 @@ namespace AMSAPP
         }
 
         #endregion LastEventData
+
+        public static TimeSheetStatus CheckTimesheet()
+        {
+            WebClient wc = new WebClient();
+            wc.UseDefaultCredentials = true;
+            var data = wc.DownloadString(new Uri(Properties.Settings.Default.TimesheetUrl));
+            HtmlDocument doc1 = new HtmlDocument();
+            doc1.LoadHtml(data);
+            Logger.Log("Downloded data from " + Properties.Settings.Default.TimesheetUrl);
+            var statusNode = doc1.DocumentNode.SelectSingleNode("//span[@id='ctl00_contentPH_ucTimesheetHeader_lblStatus']");
+            if (statusNode != null)
+            {
+                
+                if (string.IsNullOrWhiteSpace(statusNode.InnerText))
+                {
+                    return TimeSheetStatus.None;
+                } else if (statusNode.InnerText.Trim().ToLower().CompareTo("(Draft)".ToLower()) == 0)
+                {
+                    return TimeSheetStatus.Draft;
+                }
+                else if (statusNode.InnerText.Trim().ToLower().CompareTo("(Submitted)".ToLower()) == 0)
+                {
+                    return TimeSheetStatus.Submitted;
+                }
+               
+            }
+            else
+            {
+                return TimeSheetStatus.None;
+                Logger.Log("statusNode is null");
+            }
+
+            return TimeSheetStatus.None;
+        }
 
         private static TimeSpan? GetElapsedTimeFromAMS()
         {
