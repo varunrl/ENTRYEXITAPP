@@ -123,11 +123,11 @@ namespace AMSAPP
                 if (string.IsNullOrWhiteSpace(statusNode.InnerText))
                 {
                     return TimeSheetStatus.None;
-                } else if (statusNode.InnerText.Trim().ToLower().CompareTo("(Draft)".ToLower()) == 0)
+                } else if (statusNode.InnerText.Trim().ToLower().Contains("Draft".ToLower()))
                 {
                     return TimeSheetStatus.Draft;
                 }
-                else if (statusNode.InnerText.Trim().ToLower().CompareTo("(Submitted)".ToLower()) == 0)
+                else if (statusNode.InnerText.Trim().ToLower().Contains("Submitted".ToLower()))
                 {
                     return TimeSheetStatus.Submitted;
                 }
