@@ -150,6 +150,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="helpers\Logger.cs" />
+    <Compile Include="TimeSheetAlert.xaml.cs">
+      <DependentUpon>TimeSheetAlert.xaml</DependentUpon>
+    </Compile>
     <Compile Include="models\DayLog.cs" />
     <Compile Include="models\ItemsChangeObservableCollection.cs" />
     <Compile Include="models\ViewModelBase.cs" />
@@ -199,6 +202,10 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="TimeSheetAlert.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

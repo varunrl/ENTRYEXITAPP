@@ -20,5 +20,17 @@
     <Setting Name="Logging" Type="System.Boolean" Scope="Application">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="TimesheetAlertDays" Type="System.String" Scope="User">
+      <Value Profile="(Default)">FriDay</Value>
+    </Setting>
+    <Setting Name="Avatar" Type="System.Windows.Media.Imaging.BitmapImage" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="AvatarRefreshTime" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="MySite" Type="System.String" Scope="User">
+      <Value Profile="(Default)">https://my.ey.net/Default.aspx</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -82,5 +82,51 @@ namespace AMSAPP.Properties {
                 return ((bool)(this["Logging"]));
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("FriDay")]
+        public string TimesheetAlertDays {
+            get {
+                return ((string)(this["TimesheetAlertDays"]));
+            }
+            set {
+                this["TimesheetAlertDays"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Windows.Media.Imaging.BitmapImage Avatar {
+            get {
+                return ((global::System.Windows.Media.Imaging.BitmapImage)(this["Avatar"]));
+            }
+            set {
+                this["Avatar"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.DateTime AvatarRefreshTime {
+            get {
+                return ((global::System.DateTime)(this["AvatarRefreshTime"]));
+            }
+            set {
+                this["AvatarRefreshTime"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://my.ey.net/Default.aspx")]
+        public string MySite {
+            get {
+                return ((string)(this["MySite"]));
+            }
+            set {
+                this["MySite"] = value;
+            }
+        }
     }
 }

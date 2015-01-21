@@ -17,10 +17,10 @@
                     </Grid.RowDefinitions>
                     <ComboBox x:Name="cbMonths" HorizontalAlignment="Left" Margin="10,8,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="cbMonths_SelectionChanged" Height="26" Grid.Row="1"/>
                     <DataGrid x:Name="monthDataGrid" HorizontalAlignment="Left" Margin="24,29,0,0" VerticalAlignment="Top" Height="450" Width="497"  IsReadOnly="True" Grid.Row="2" AutoGeneratingColumn="monthDataGrid_AutoGeneratingColumn" LoadingRow="monthDataGrid_LoadingRow" MouseDoubleClick="monthDataGrid_MouseDoubleClick" >
-                        
-                     
+
+
                     </DataGrid>
-                   
+
                     <Label x:Name="lblAverage" Content="00:00:00" HorizontalAlignment="Left" Margin="67,8,0,0" VerticalAlignment="Top" Width="73" Height="26" FontWeight="Bold" FontSize="14"/>
                     <Label Content="Average : " HorizontalAlignment="Left" Margin="4,8,0,0" VerticalAlignment="Top" Height="26" Width="63"/>
                     <Label Content="Total Days : " HorizontalAlignment="Left" Margin="141,8,0,0" VerticalAlignment="Top" Height="26" Width="74"/>
@@ -81,7 +81,17 @@
                             <Label x:Name="lblMinHours" Content="00:00" FontSize="14"  FontWeight="Bold"/>
                         </StackPanel>
                         <Slider x:Name="sliderMinHours" Margin="10,0"  Minimum="300" Maximum="1000" LargeChange="15" TickFrequency="15" SmallChange="15" IsSnapToTickEnabled="True" ValueChanged="sliderMinHours_ValueChanged"/>
+                        <StackPanel Margin="10">
+                            <Label Content="Timesheet Alert Settings"/>
+                            <CheckBox x:Name="chkFriday" Content="FriDay" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
+                            <CheckBox x:Name="chkThursday" Content="Thursday" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
+                            <CheckBox x:Name="chkWednesday" Content="Wednesday" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
+                            <CheckBox x:Name="chkTuesday" Content="Tuesday" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
+                            <CheckBox x:Name="chkMonday" Content="Monday" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
+
+                        </StackPanel>
                     </StackPanel>
+
                 </Grid>
             </TabItem>
             <TabItem Header="Help">
@@ -91,7 +101,7 @@
             </TabItem>
             <TabItem Header="TimeSheet" >
                 <Grid>
-                    <Label x:Name="lblTimesheetStatus" Content="Label" HorizontalAlignment="Left" Margin="227,71,0,0" VerticalAlignment="Top" RenderTransformOrigin="-5.579,-0.269" Width="150"/>
+                    <Label x:Name="lblTimesheetStatus" Content="Label" HorizontalAlignment="Left" Margin="70,71,0,0" VerticalAlignment="Top" RenderTransformOrigin="-5.579,-0.269" Width="307"/>
                 </Grid>
             </TabItem>
         </TabControl>

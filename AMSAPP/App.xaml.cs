@@ -21,7 +21,7 @@ namespace AMSAPP
         public bool SummaryWindowOpen;
         System.Windows.Threading.DispatcherTimer AMSLoadTimer = null;
         DataContext MyDataContext;
-
+        public string timesheetAlert;
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
@@ -71,28 +71,39 @@ namespace AMSAPP
 
         private void TimsheetAlert()
         {
-            var result = AMSUtil.CheckTimesheet();
-             try
+            var days = AMSUtil.GetTimesheetAlertWeeks();
+            if (days.Contains(DateTime.Now.DayOfWeek))
+            {
+                var result = AMSUtil.CheckTimesheet();
+                try
                 {
-                if (result == TimeSheetStatus.None)
-                {
+                    if (result == TimeSheetStatus.None)
+                    {
+                        this.timesheetAlert = "Please submit Timesheet";
+                        TimesheetAlertWindow ts = new TimesheetAlertWindow();
+                        ts.ShowDialog();
+                        //this.notifyIcon.ShowBalloonTip("TimeSheet", this.timesheetAlert, notifyIcon.Icon);
 
-                    this.notifyIcon.ShowBalloonTip("TimeSheet", "Please submit Timesheet", notifyIcon.Icon);       
-               
+                    }
+                    else if (result == TimeSheetStatus.Draft)
+                    {
+                        this.timesheetAlert = "Time Sheet in draft. Please submit";
+                        TimesheetAlertWindow ts = new TimesheetAlertWindow();
+                        ts.ShowDialog();
+                        //this.notifyIcon.ShowBalloonTip("TimeSheet", this.timesheetAlert, notifyIcon.Icon);
+                    }
+                    else if (result == TimeSheetStatus.Submitted)
+                    {
+                        //this.timesheetAlert = "Time Sheet submitted";
+                        //TimesheetAlertWindow ts = new TimesheetAlertWindow();
+                        //ts.ShowDialog();
+                    }
                 }
-                else if (result == TimeSheetStatus.Draft)
+                catch (Exception ex)
                 {
-                    this.notifyIcon.ShowBalloonTip("TimeSheet", "Time Sheet in draft. Please submit", notifyIcon.Icon); 
+                    Logger.Log(ex.StackTrace);
                 }
-                else if (result == TimeSheetStatus.Submitted)
-                {
-                    
-                }
-             }
-             catch (Exception ex)
-             {
-                 Logger.Log(ex.StackTrace);
-             }
+            }
         }
 
         public void LoadData()

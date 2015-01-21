@@ -5,6 +5,8 @@ using System.Globalization;
 using System.Net;
 using HtmlAgilityPack;
 using System.Collections.Generic;
+using System.Windows.Media.Imaging;
+using System.IO;
 
 namespace AMSAPP
 {
@@ -108,15 +110,143 @@ namespace AMSAPP
 
         #endregion LastEventData
 
+
+        public static  List<DayOfWeek> GetTimesheetAlertWeeks()
+        {
+           var days =  Properties.Settings.Default.TimesheetAlertDays.Split(',');
+            var dayEnums = new List<DayOfWeek>();
+            foreach(var day in days)
+            {
+                if (!string.IsNullOrWhiteSpace(day))
+                {
+                    DayOfWeek dayEnum;
+                    Enum.TryParse<DayOfWeek>(day, true, out dayEnum);
+                    if (dayEnum != null)
+                    {
+                        dayEnums.Add((DayOfWeek)dayEnum);
+                    }
+                }
+            }
+            return dayEnums;
+        }
+
+        public static void RemoveTimesheetAlertWeeks(string day)
+        {
+            if (!string.IsNullOrWhiteSpace(day))
+            {
+                var days = new List<string>(Properties.Settings.Default.TimesheetAlertDays.Split(','));
+                days.Remove(day);
+                Properties.Settings.Default.TimesheetAlertDays = String.Join(",", days);
+                Properties.Settings.Default.Save();
+            }
+
+        }
+
+        public static BitmapImage GetAvatar()
+        {
+
+            if(Properties.Settings.Default.Avatar != null &&  Properties.Settings.Default.AvatarRefreshTime != null)
+            {
+                if((Properties.Settings.Default.AvatarRefreshTime - DateTime.Now).Days <1)
+                {
+                    return Properties.Settings.Default.Avatar;
+                }
+            }
+            var path = GetImagePath();
+
+            if (path != null)
+            {
+
+                var image = new BitmapImage();
+                int BytesToRead = 100;
+                WebRequest request = WebRequest.Create(new Uri(path, UriKind.Absolute));
+                request.Timeout = -1;
+                request.UseDefaultCredentials = true;
+                WebResponse response = request.GetResponse();
+                Stream responseStream = response.GetResponseStream();
+                BinaryReader reader = new BinaryReader(responseStream);
+                MemoryStream memoryStream = new MemoryStream();
+
+                byte[] bytebuffer = new byte[BytesToRead];
+                int bytesRead = reader.Read(bytebuffer, 0, BytesToRead);
+
+                while (bytesRead > 0)
+                {
+                    memoryStream.Write(bytebuffer, 0, bytesRead);
+                    bytesRead = reader.Read(bytebuffer, 0, BytesToRead);
+                }
+
+                image.BeginInit();
+                memoryStream.Seek(0, SeekOrigin.Begin);
+
+                image.StreamSource = memoryStream;
+                image.EndInit();
+                Properties.Settings.Default.Avatar = image;
+                Properties.Settings.Default.AvatarRefreshTime = DateTime.Now;
+                Properties.Settings.Default.Save();
+                return image;
+            }
+            else
+                return null;
+        }
+
+    private static string GetImagePath()
+    {
+                try 
+	            {	        
+		            WebClient wc = new WebClient();
+                            wc.UseDefaultCredentials = true;
+                            var data = wc.DownloadString(new Uri(Properties.Settings.Default.MySite));
+                            HtmlDocument doc1 = new HtmlDocument();
+                            doc1.LoadHtml(data);
+                            var Node = doc1.DocumentNode.SelectSingleNode("//img[@class='ms-profile-image']");
+
+                            if(Node != null)
+                            {
+                                return Node.Attributes["src"].Value;
+                            }
+	            }
+	            catch (Exception)
+	            {
+		
+		            return null;
+	            }
+        return null;
+    }
+
+        public static void AddTimesheetAlertWeeks(string day)
+        {
+            if (!string.IsNullOrWhiteSpace(day))
+            {
+                var days = new List<string>(Properties.Settings.Default.TimesheetAlertDays.Split(','));
+                days.Remove(day);
+                days.Add(day);
+                Properties.Settings.Default.TimesheetAlertDays = String.Join(",", days);
+                Properties.Settings.Default.Save();
+            }
+
+        }
+
         public static TimeSheetStatus CheckTimesheet()
         {
+            
+            
             WebClient wc = new WebClient();
             wc.UseDefaultCredentials = true;
             var data = wc.DownloadString(new Uri(Properties.Settings.Default.TimesheetUrl));
             HtmlDocument doc1 = new HtmlDocument();
             doc1.LoadHtml(data);
             Logger.Log("Downloded data from " + Properties.Settings.Default.TimesheetUrl);
+
+
+            var Node = doc1.DocumentNode.SelectSingleNode("//span[@id='ctl00_contentPH_ucTimesheetHeader_lblPHrsTotal']");
+            if(Node != null)
+            {
+                string hours = Node.InnerText;
+            }
+
             var statusNode = doc1.DocumentNode.SelectSingleNode("//span[@id='ctl00_contentPH_ucTimesheetHeader_lblStatus']");
+
             if (statusNode != null)
             {
                 
@@ -137,7 +267,7 @@ namespace AMSAPP
             {
                 return TimeSheetStatus.None;
                 Logger.Log("statusNode is null");
-            }
+            }            
 
             return TimeSheetStatus.None;
         }

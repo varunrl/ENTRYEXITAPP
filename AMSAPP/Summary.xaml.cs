@@ -561,6 +561,36 @@ namespace AMSAPP
             sliderRefreshInterval.Value = Properties.Settings.Default.RefreshInterval;
             lblMinHours.Content = TimeSpan.FromMinutes(Properties.Settings.Default.MinTimeSpan).ToString(); 
             sliderMinHours.Value = Properties.Settings.Default.MinTimeSpan;
+
+
+            SetCheckbox();
+            
+
+        }
+
+        private void SetCheckbox()
+        {
+            var alertDays = AMSUtil.GetTimesheetAlertWeeks();
+            if(alertDays.Contains(DayOfWeek.Friday))
+            {
+                chkFriday.IsChecked = true;
+            }
+            if (alertDays.Contains(DayOfWeek.Thursday))
+            {
+                chkThursday.IsChecked = true;
+            }
+            if (alertDays.Contains(DayOfWeek.Wednesday))
+            {
+                chkWednesday.IsChecked = true;
+            }
+            if (alertDays.Contains(DayOfWeek.Tuesday))
+            {
+                chkTuesday.IsChecked = true;
+            }
+            if (alertDays.Contains(DayOfWeek.Monday))
+            {
+                chkMonday.IsChecked = true;
+            }
         }
 
         private void sliderRefreshInterval_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -611,6 +641,20 @@ namespace AMSAPP
                 
 
         }
+
+        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            CheckBox chk = (CheckBox)sender;
+            AMSUtil.AddTimesheetAlertWeeks(chk.Content.ToString());
+        }
+
+        private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            CheckBox chk = (CheckBox)sender;
+            AMSUtil.RemoveTimesheetAlertWeeks(chk.Content.ToString());
+        }
+
+      
 
     }
 }
