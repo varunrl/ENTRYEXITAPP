@@ -7,9 +7,23 @@ namespace AMSAPP.models
 {
     public  class DayLog
     {
-        public int Day { get; set; }
+        public DateTime Date { get; set; }
 
-        public string WeekDay { get; set; }
+        public int Day
+        {
+            get
+            {
+                return this.Date.Day; ;
+            }
+        }
+
+        public string WeekDay
+        {
+            get
+            {
+                return this.Date.DayOfWeek.ToString();
+            }
+        }
 
         public string Title { get; set; }
 
@@ -17,6 +31,7 @@ namespace AMSAPP.models
 
         public string Color { get; set; }
 
+        public DayLogInfo info { get; set; }
 
     }
 }

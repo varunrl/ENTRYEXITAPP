@@ -19,6 +19,7 @@ namespace AMSAPP
         public TaskbarIcon notifyIcon;
         public bool HelpWindowOpen;
         public bool SummaryWindowOpen;
+        public Window Summary;
         System.Windows.Threading.DispatcherTimer AMSLoadTimer = null;
         DataContext MyDataContext;
         public string timesheetAlert;
@@ -33,6 +34,7 @@ namespace AMSAPP
             notifyIcon = (TaskbarIcon)FindResource("NotifyIcon");
 
             Application.Current.MainWindow = new MainWindow();
+            ((App)Application.Current).Summary = new Summary();
             //Application.Current.MainWindow.Show();
 
             CustomStartUp();

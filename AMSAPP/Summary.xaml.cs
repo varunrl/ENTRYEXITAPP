@@ -19,7 +19,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.ObjectModel;
 using AMSAPP.models;
-
+using Xceed.Wpf.Toolkit;
+using System.Runtime.InteropServices;
+using System.IO;
 
 namespace AMSAPP
 {
@@ -30,13 +32,14 @@ namespace AMSAPP
     {
         private HtmlDocument doc = new HtmlDocument();
         private ItemsChangeObservableCollection<SummaryGridRow> obsSummaryGrid;
-      
+  
 
         public Summary()
         {
             try
             {
                 InitializeComponent();
+               
                 Logger.Log("InitializeComponent done");
             }
             catch (Exception ex)
@@ -70,6 +73,7 @@ namespace AMSAPP
             try
             {
                 DataContext tetst = new DataContext();
+                
                 dataGrid1.ItemsSource = tetst.ComputerEvents.ToList().Where(x => x.EventOn.Date == DateTime.Now.Date).ToList();
                 dataGrid2.ItemsSource = tetst.AMSEvents.ToList().Where(x => x.EventOn.Date == DateTime.Now.Date).ToList();
             }
@@ -168,66 +172,7 @@ namespace AMSAPP
 
             if (monthNode != null)
             {
-                var monthGrid = monthNode.ParentNode.NextSibling.SelectSingleNode(".//td[@class='dxMonthGrid']");
-                if (monthGrid == null)
-                {
-                    Logger.Log("monthGrid is null");
-                }
-                else
-                {
-                    Logger.Log("monthGrid is not null");
-                }
-                var tds = monthGrid.SelectNodes(string.Format(".//*[contains(@class,'{0}')]", "dxeCalendarDay_DevEx"));
-
-                Logger.Log("Days found in monthGrid : " + tds.Count());
-                var dayLogs = new List<DayLog>();
-                foreach (var td in tds)
-                {
-                    int day;
-                    if (td.Attributes["Class"] != null && td.Attributes["Class"].Value.Contains("dxeCalendarOtherMonth_DevEx"))
-                    {
-                        Logger.Log("skipping other month date : " + td.InnerText);
-                        continue;
-                    }
-
-                    if (Int32.TryParse(td.InnerText, out day))
-                    {
-                        if (td.Attributes["Class"] != null && td.Attributes["Class"].Value.Contains("dxeCalendarToday_DevEx"))
-                        {
-                            dayLogs.Add(new DayLog
-                            {
-                                Day = day,
-                                Title = "",
-                                Class = td.Attributes["Class"] != null ? td.Attributes["Class"].Value : "",
-                                Color = td.Attributes["bgcolor"] != null ? td.Attributes["bgcolor"].Value : "white",
-                                WeekDay = (new DateTime(year, iMonth, day)).DayOfWeek.ToString()
-                            }
-
-                                    );
-                            Logger.Log("Added Today");
-                        }
-                        else
-                        {
-                            dayLogs.Add(new DayLog
-                            {
-                                Day = day,
-                                Title = td.Attributes["Title"] != null ? td.Attributes["Title"].Value : "",
-                                Class = td.Attributes["Class"] != null ? td.Attributes["Class"].Value : "",
-                                Color = td.Attributes["bgcolor"] != null ? td.Attributes["bgcolor"].Value : "white",
-                                WeekDay = (new DateTime(year, iMonth, day)).DayOfWeek.ToString()
-                            }
-
-
-                                    );
-                            Logger.Log("Added DayLog " + day);
-                        }
-                    }
-                    else
-                    {
-                        Logger.Log("Can not parse to integer : " + td.InnerText);
-                    }
-                }
-                Logger.Log("dayLogs count" + dayLogs.Count());
+                var dayLogs = ExtractDayLogs(monthNode, year, iMonth);
                 var displayList = dayLogs.Select(x => GetGridValue(x)).ToList();
                 Logger.Log("displayList count" + displayList.Count());
 
@@ -239,34 +184,120 @@ namespace AMSAPP
             }
         }
 
+        private static List<DayLog> ExtractDayLogs(HtmlNode monthNode, int year, int iMonth)
+        {
+            DataContext dts = new DataContext();
+            var monthGrid = monthNode.ParentNode.NextSibling.SelectSingleNode(".//td[@class='dxMonthGrid']");
+            if (monthGrid == null)
+            {
+                Logger.Log("monthGrid is null");
+            }
+            else
+            {
+                Logger.Log("monthGrid is not null");
+            }
+            var tds = monthGrid.SelectNodes(string.Format(".//*[contains(@class,'{0}')]", "dxeCalendarDay_DevEx"));
+
+            Logger.Log("Days found in monthGrid : " + tds.Count());
+            var dayLogs = new List<DayLog>();
+            foreach (var td in tds)
+            {
+                int day;
+                if (td.Attributes["Class"] != null && td.Attributes["Class"].Value.Contains("dxeCalendarOtherMonth_DevEx"))
+                {
+                    Logger.Log("skipping other month date : " + td.InnerText);
+                    continue;
+                }
+
+                if (Int32.TryParse(td.InnerText, out day))
+                {
+
+                    var info = dts.GetDayLogForDay(new DateTime(year, iMonth, day));
+                    if (td.Attributes["Class"] != null && td.Attributes["Class"].Value.Contains("dxeCalendarToday_DevEx"))
+                    {
+                        dayLogs.Add(new DayLog
+                        {
+                            Date = new DateTime(year, iMonth, day),
+                            Title = "",
+                            Class = td.Attributes["Class"] != null ? td.Attributes["Class"].Value : "",
+                            Color = td.Attributes["bgcolor"] != null ? td.Attributes["bgcolor"].Value : "white",
+                           info  = info
+                        }
+
+                                );
+                        Logger.Log("Added Today");
+                    }
+                    else
+                    {
+                        dayLogs.Add(new DayLog
+                        {
+                            Date = new DateTime(year, iMonth, day),
+                            Title = td.Attributes["Title"] != null ? td.Attributes["Title"].Value : "",
+                            Class = td.Attributes["Class"] != null ? td.Attributes["Class"].Value : "",
+                            Color = td.Attributes["bgcolor"] != null ? td.Attributes["bgcolor"].Value : "white",
+                            info  = info
+                        }
+
+
+                                );
+                        Logger.Log("Added DayLog " + day);
+                    }
+                }
+                else
+                {
+                    Logger.Log("Can not parse to integer : " + td.InnerText);
+                }
+            }
+            Logger.Log("dayLogs count" + dayLogs.Count());
+            return dayLogs;
+        }
+
         private SummaryGridRow GetGridValue(DayLog dayLog)
         {
             TimeSpan time = new TimeSpan();
             string duration = "";
-            string comment = "";
+            string amsComment = "";
             if (dayLog.Title.Length >= 8 && TimeSpan.TryParse(dayLog.Title.Substring(0, 8), out time))
             {
                 duration = time.ToString();
                 if (dayLog.Title.Length > 8)
                 {
-                    comment = dayLog.Title.Substring(8, dayLog.Title.Length - 8);
+                    amsComment = dayLog.Title.Substring(8, dayLog.Title.Length - 8);
                 } 
-                if (comment.Trim().Length == 0)
+                if (amsComment.Trim().Length == 0)
                 {
                     if (dayLog.Class.Contains("dxeCalendarWeekend_DevEx"))
                     {
-                        comment = "Weekend";
+                        amsComment = "Weekend";
                     }
                 }
             }
             else
             {
-                comment = dayLog.Title;
+                amsComment = dayLog.Title;
                
             }
-            comment = comment.Replace(":", "").Trim();
+            amsComment = amsComment.Replace(":", "").Trim();
+            var comment = "";
+            if(dayLog.info != null )
+            {
+                if(!string.IsNullOrWhiteSpace(dayLog.info.Comments))
+                {
+                    comment = dayLog.info.Comments;
+                }
+                if (dayLog.info.BufferTimespan > TimeSpan.Zero)
+                {
+                    if(!string.IsNullOrEmpty(comment))
+                    {
+                        comment += Environment.NewLine;
+                    }
+                    comment +=  "Added buffer " + dayLog.info.BufferTimespan.ToString(@"hh\:mm"); 
+                    duration = (time + dayLog.info.BufferTimespan).ToString();
+                }
+            }
+            
             //var color = GetValueFromStyle(dayLog.Style, "BACKGROUND-COLOR");
-            return new SummaryGridRow { WeekDay = dayLog.WeekDay, Day = dayLog.Day, Duration = duration, Comments = comment, Color = dayLog.Color };
+            return new SummaryGridRow { Date = dayLog.Date, WeekDay = dayLog.WeekDay, Day = dayLog.Day, Duration = duration, Comments = comment, Color = dayLog.Color, AMScomments = amsComment };
         }
 
        
@@ -279,28 +310,54 @@ namespace AMSAPP
                 int daysRemaining = 0;
                 foreach (var dayLog in dayLogs)
                 {
+
+                    if (dayLog.info != null)
+                    {
+                        sum += dayLog.info.BufferTimespan;
+
+                    }
+
                     TimeSpan time = new TimeSpan();
                     if (dayLog.Title.Trim().Length >= 8)
                     {
                         if (TimeSpan.TryParse(dayLog.Title.Substring(0, 8), out time))
                         {
                             sum += time;
-                            if (!(dayLog.Class.Contains("dxeCalendarWeekend_DevEx")))
-                            {
-                                if (dayLog.Title.Contains("Leave Half Day"))
-                                {
-                                    count += 0.5;
-                                }
-                                else
-                                {
-                                    count++;
-                                }
-                            }
+
                         }
                     }
-                    else
+
+                    if (dayLog.info != null && dayLog.info.Leave != "None")
                     {
-                        if (!(dayLog.Class.Contains("dxeCalendarWeekend_DevEx") || dayLog.Class.Contains("dxeCalendarOtherMonth_DevEx")))
+                        count += dayLog.info.workingCount;
+
+                    }
+                    else if (!(dayLog.Class.Contains("dxeCalendarWeekend_DevEx")) && dayLog.Day < DateTime.Now.Day && !dayLog.Class.Contains("dxeCalendarOtherMonth_DevEx"))
+                    {
+                       
+                        if (dayLog.Title.Contains("Leave Half Day"))
+                        {
+                            count += 0.5;
+                        }
+                        else if (dayLog.Title.Contains("Public Holiday"))
+                        {
+
+                        }
+                        else if (dayLog.Title.Contains("Leave"))
+                        {
+
+                        }
+                        else if (dayLog.Title.Contains("Offday"))
+                        {
+
+                        }
+                        else
+                        {
+                            count++;
+                        }
+                    }else
+                    {
+                        if (!dayLog.Class.Contains("dxeCalendarWeekend_DevEx") )
                         {
                             daysRemaining++;
                         }
@@ -433,6 +490,10 @@ namespace AMSAPP
                         HorizontalAlignment.Center);
                     style.Setters.Add(bbSetter);
                     textColumn.ElementStyle = style;
+                }
+                if (e.Column.Header.ToString() == "Date")
+                {
+                    e.Cancel = true;
                 }
                 if (e.Column.Header.ToString() == "Color")
                 {
@@ -625,19 +686,42 @@ namespace AMSAPP
         {
             if (monthDataGrid.SelectedItem == null) return;
             var selectedPerson = monthDataGrid.SelectedItem as SummaryGridRow;
+
+            DataContext test = new DataContext();
+            var info = test.GetDayLogForDay(selectedPerson.Date);
+
+            DayDetails details = new DayDetails(info);
+            details.ShowDialog();
+            if(details.ok == true)
+            {
+                if(!string.IsNullOrWhiteSpace(details.Comments))
+                {
+                    obsSummaryGrid.Single(x => x.Day == selectedPerson.Day).Comments = details.Comments;
+                }
+                DataContext tetst = new DataContext();
+                tetst.AddDayLog(new DayLogInfo
+                {
+                    Date = selectedPerson.Date,
+                    Leave = details.LeaveStatus,
+                    Comments = details.Comments,
+                    Buffer = details.Buffer.ToString(@"hh\:mm")
+                });
+
+                LoadMonthGrid(cbMonths.SelectedItem.ToString());
+            }
             //await this.ShowMessageAsync("This is the title", "Some message");
-            //var dialog = (BaseMetroDialog)this.Resources["SimpleDialogTest"];
+
             
             //await this.ShowMetroDialogAsync(dialog);
 
-            var result = await this.ShowInputAsync("Hello!", "Comments : ");
+            //var result = await this.ShowInputAsync("Hello!", "Comments : ");
 
-            if (result != null)
-            {
+            //if (result != null)
+            //{
 
-                obsSummaryGrid.Single(x => x.Day == selectedPerson.Day).Comments = result;
+            //    obsSummaryGrid.Single(x => x.Day == selectedPerson.Day).Comments = result;
                 
-            }
+            //}
                 
 
         }
@@ -654,7 +738,48 @@ namespace AMSAPP
             AMSUtil.RemoveTimesheetAlertWeeks(chk.Content.ToString());
         }
 
-      
+        private async void export_Click(object sender, RoutedEventArgs e)
+        {
+            await ExportToExcel();
+        }
+
+        private async Task ExportToExcel()
+        {
+            try
+            {
+                monthDataGrid.SelectAllCells();
+                monthDataGrid.ClipboardCopyMode = DataGridClipboardCopyMode.IncludeHeader;
+                ApplicationCommands.Copy.Execute(null, monthDataGrid);
+                String resultat = (string)Clipboard.GetData(DataFormats.CommaSeparatedValue);
+                Clipboard.Clear();
+                //String result = (string)Clipboard.GetData(DataFormats.Text);
+                monthDataGrid.UnselectAllCells();
+                string fileName = @"C:\Temp\AMS" + Guid.NewGuid().ToString() + ".csv";
+                Directory.CreateDirectory(Path.GetDirectoryName(@"C:\Temp\AMS.csv"));
+                System.IO.StreamWriter file = new System.IO.StreamWriter(fileName);
+                file.WriteLine(resultat);
+                file.Close();
+                //await this.ShowMessageAsync("Export to excel ", "check file " + fileName);
+                Microsoft.Office.Interop.Excel.Application excel = new Microsoft.Office.Interop.Excel.Application();
+                Microsoft.Office.Interop.Excel.Workbook wb = excel.Workbooks.Open(fileName);
+                excel.Visible = true;
+            }
+            catch (Exception)
+            {
+                
+                
+            }     
+        }
+
+        private void MetroWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            e.Cancel = true;
+            this.Visibility = Visibility.Hidden;
+            ((App)Application.Current).SummaryWindowOpen = false;
+        }
+
+     
+     
 
     }
 }

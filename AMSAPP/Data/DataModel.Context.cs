@@ -1,6 +1,7 @@
 ﻿
 namespace AMSAPP
 {
+    using AMSAPP.models;
     using System;
     using System.Collections.Generic;
     using System.Configuration;
@@ -18,6 +19,35 @@ namespace AMSAPP
         public DataContext ()
         {
             ConnectionString = ConfigurationManager.ConnectionStrings["DataContext"].ToString();
+        }
+
+        public virtual IEnumerable<DayLogInfo> DayLogInfos
+        {
+            get
+            {
+
+                SqlCeConnection conn = null;
+                List<DayLogInfo> list;
+                using (conn = new SqlCeConnection(ConnectionString))
+                {
+                    conn.Open();
+
+                    // Create a String to hold the query.
+                    string query = "SELECT * FROM DayLogInfo";
+
+                    // Create a SqlCommand object and pass the constructor the connection string and the query string.
+                    SqlCeCommand queryCommand = new SqlCeCommand(query, conn);
+
+                    // Use the above SqlCommand object to create a SqlDataReader object.
+                    SqlCeDataReader queryCommandReader = queryCommand.ExecuteReader();
+
+                    list = (new List<DayLogInfo>()).FromDataReader<DayLogInfo>(queryCommandReader).ToList();
+                    // Close the connection
+                    conn.Close();
+                }
+                return list;
+
+            }
         }
 
         public virtual IEnumerable<ComputerEvent> ComputerEvents { get {
@@ -74,6 +104,80 @@ namespace AMSAPP
             }
         }
 
+        public  DayLogInfo GetDayLogForDay(DateTime date)
+        {
+            SqlCeConnection conn = null;
+            List<DayLogInfo> list;
+            using (conn = new SqlCeConnection(ConnectionString))
+            {
+                conn.Open();
+
+                // Create a String to hold the query.
+                string query = "SELECT * FROM DayLogInfo where [Date] = '"+ date.ToString("yyyy-MM-dd") +"'";
+
+                // Create a SqlCommand object and pass the constructor the connection string and the query string.
+                SqlCeCommand queryCommand = new SqlCeCommand(query, conn);
+
+                // Use the above SqlCommand object to create a SqlDataReader object.
+                SqlCeDataReader queryCommandReader = queryCommand.ExecuteReader();
+
+                list = (new List<DayLogInfo>()).FromDataReader<DayLogInfo>(queryCommandReader).ToList();
+                // Close the connection
+                conn.Close();
+
+                return list.FirstOrDefault();
+            }
+           
+
+        }
+
+        public void AddDayLog(DayLogInfo log)
+        {
+            var info = this.GetDayLogForDay(log.Date);
+
+            if (info == null)
+            {
+                SqlCeConnection conn = null;
+                using (conn = new SqlCeConnection(ConnectionString))
+                {
+                    conn.Open();
+
+                    SqlCeCommand cmd = conn.CreateCommand();
+                    cmd.CommandText = "INSERT INTO DayLogInfo ([Leave],[Comments],[Date],Buffer) Values('"
+                                        + log.Leave + "','" + log.Comments + "','" + log.Date.ToString("yyyy-MM-dd HH:mm:ss") + "','" + log.Buffer + "')";
+
+                    cmd.ExecuteNonQuery();
+
+                    // Close the connection
+                    conn.Close();
+                }
+            }else
+            {
+                log.Id = info.Id;
+                UpdateDayLog(log);
+            }
+
+        }
+
+        private void UpdateDayLog(DayLogInfo log)
+        {
+            SqlCeConnection conn = null;
+            using (conn = new SqlCeConnection(ConnectionString))
+            {
+                conn.Open();
+
+                SqlCeCommand cmd = conn.CreateCommand();
+                var query = "update DayLogInfo set [Leave] = '{0}' , [Comments] = '{1}', Buffer = '{2}' where Id = {3}  ";
+
+                cmd.CommandText = string.Format(query,log.Leave,log.Comments,log.Buffer, log.Id);
+
+                cmd.ExecuteNonQuery();
+
+                // Close the connection
+                conn.Close();
+            }
+
+        }
      
 
         public void AddComputerEvent(ComputerEvent event1)

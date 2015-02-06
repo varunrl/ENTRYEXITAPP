@@ -66,8 +66,7 @@ namespace AMSAPP
                     CommandAction = () =>
                     {
                         ((App)Application.Current).SummaryWindowOpen = true;
-                        Window summary = new Summary();
-                        summary.Show();
+                        ((App)Application.Current).Summary.Show() ;
 
                     }
                 };

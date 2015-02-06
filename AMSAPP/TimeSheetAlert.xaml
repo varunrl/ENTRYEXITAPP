@@ -27,7 +27,7 @@
     <Grid HorizontalAlignment="Center" Height="77"  VerticalAlignment="Top" Margin="0,0,0,0"  >
 
 
-        <Image x:Name="avatar" HorizontalAlignment="Left" Height="77" Margin="168,73,0,-73" VerticalAlignment="Top" Width="80" RenderTransformOrigin="0.29,0.26"/>
+        <Image x:Name="avatar" HorizontalAlignment="Left" Height="77" Margin="168,73,0,-73" VerticalAlignment="Top" Width="80" RenderTransformOrigin="0.29,0.26" Source="Avatar/avatar.jpg" />
         <Path Stroke="Black" StrokeThickness="1"  Data="M 0,10 A 10,10 90 0 1 10,0 H 90 A 10,10 -90 0 1 100,10 V 60 A 10,10 -90 0 1 90,70 H 80 L 70,80 L 60,70 H 10 A 10,10 -90 0 1 0,60 V 10" Fill="White"  HorizontalAlignment="Left" Margin="3,8.5,0,0" Width="289" Stretch="Fill" />
         <TextBlock x:Name="TimesheetData" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" Text="Timesheet in draft. Please submit Timesheet" Margin="27,8,16,9" Width="251" TextWrapping="Wrap" Height="60"/>
         <!--<Grid x:Name="grid" Margin="-100,3,100,-20">

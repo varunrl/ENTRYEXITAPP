@@ -117,15 +117,12 @@ namespace AMSAPP.Properties {
             }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("https://my.ey.net/Default.aspx")]
         public string MySite {
             get {
                 return ((string)(this["MySite"]));
-            }
-            set {
-                this["MySite"] = value;
             }
         }
     }

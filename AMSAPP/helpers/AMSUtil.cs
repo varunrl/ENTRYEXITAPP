@@ -156,35 +156,43 @@ namespace AMSAPP
 
             if (path != null)
             {
-
-                var image = new BitmapImage();
-                int BytesToRead = 100;
-                WebRequest request = WebRequest.Create(new Uri(path, UriKind.Absolute));
-                request.Timeout = -1;
-                request.UseDefaultCredentials = true;
-                WebResponse response = request.GetResponse();
-                Stream responseStream = response.GetResponseStream();
-                BinaryReader reader = new BinaryReader(responseStream);
-                MemoryStream memoryStream = new MemoryStream();
-
-                byte[] bytebuffer = new byte[BytesToRead];
-                int bytesRead = reader.Read(bytebuffer, 0, BytesToRead);
-
-                while (bytesRead > 0)
+                try
                 {
-                    memoryStream.Write(bytebuffer, 0, bytesRead);
-                    bytesRead = reader.Read(bytebuffer, 0, BytesToRead);
+
+                    var image = new BitmapImage();
+                    int BytesToRead = 100;
+                    WebRequest request = WebRequest.Create(new Uri(path, UriKind.Absolute));
+                    request.Timeout = -1;
+                    request.UseDefaultCredentials = true;
+                    WebResponse response = request.GetResponse();
+                    Stream responseStream = response.GetResponseStream();
+                    BinaryReader reader = new BinaryReader(responseStream);
+                    MemoryStream memoryStream = new MemoryStream();
+
+                    byte[] bytebuffer = new byte[BytesToRead];
+                    int bytesRead = reader.Read(bytebuffer, 0, BytesToRead);
+
+                    while (bytesRead > 0)
+                    {
+                        memoryStream.Write(bytebuffer, 0, bytesRead);
+                        bytesRead = reader.Read(bytebuffer, 0, BytesToRead);
+                    }
+
+                    image.BeginInit();
+                    memoryStream.Seek(0, SeekOrigin.Begin);
+
+                    image.StreamSource = memoryStream;
+                    image.EndInit();
+                    Properties.Settings.Default.Avatar = image;
+                    Properties.Settings.Default.AvatarRefreshTime = DateTime.Now;
+                    Properties.Settings.Default.Save();
+                    return image;
                 }
-
-                image.BeginInit();
-                memoryStream.Seek(0, SeekOrigin.Begin);
-
-                image.StreamSource = memoryStream;
-                image.EndInit();
-                Properties.Settings.Default.Avatar = image;
-                Properties.Settings.Default.AvatarRefreshTime = DateTime.Now;
-                Properties.Settings.Default.Save();
-                return image;
+                catch (Exception ex)
+                {
+                    
+                  return null;
+                }
             }
             else
                 return null;
@@ -229,46 +237,55 @@ namespace AMSAPP
 
         public static TimeSheetStatus CheckTimesheet()
         {
-            
-            
-            WebClient wc = new WebClient();
-            wc.UseDefaultCredentials = true;
-            var data = wc.DownloadString(new Uri(Properties.Settings.Default.TimesheetUrl));
-            HtmlDocument doc1 = new HtmlDocument();
-            doc1.LoadHtml(data);
-            Logger.Log("Downloded data from " + Properties.Settings.Default.TimesheetUrl);
 
 
-            var Node = doc1.DocumentNode.SelectSingleNode("//span[@id='ctl00_contentPH_ucTimesheetHeader_lblPHrsTotal']");
-            if(Node != null)
+            try
             {
-                string hours = Node.InnerText;
-            }
+                WebClient wc = new WebClient();
+                wc.UseDefaultCredentials = true;
+                var data = wc.DownloadString(new Uri(Properties.Settings.Default.TimesheetUrl));
+                HtmlDocument doc1 = new HtmlDocument();
+                doc1.LoadHtml(data);
+                Logger.Log("Downloded data from " + Properties.Settings.Default.TimesheetUrl);
 
-            var statusNode = doc1.DocumentNode.SelectSingleNode("//span[@id='ctl00_contentPH_ucTimesheetHeader_lblStatus']");
 
-            if (statusNode != null)
-            {
-                
-                if (string.IsNullOrWhiteSpace(statusNode.InnerText))
+                var Node = doc1.DocumentNode.SelectSingleNode("//span[@id='ctl00_contentPH_ucTimesheetHeader_lblPHrsTotal']");
+                if (Node != null)
+                {
+                    string hours = Node.InnerText;
+                }
+
+                var statusNode = doc1.DocumentNode.SelectSingleNode("//span[@id='ctl00_contentPH_ucTimesheetHeader_lblStatus']");
+
+                if (statusNode != null)
+                {
+
+                    if (string.IsNullOrWhiteSpace(statusNode.InnerText))
+                    {
+                        return TimeSheetStatus.None;
+                    }
+                    else if (statusNode.InnerText.Trim().ToLower().Contains("Draft".ToLower()))
+                    {
+                        return TimeSheetStatus.Draft;
+                    }
+                    else if (statusNode.InnerText.Trim().ToLower().Contains("Submitted".ToLower()))
+                    {
+                        return TimeSheetStatus.Submitted;
+                    }
+
+                }
+                else
                 {
                     return TimeSheetStatus.None;
-                } else if (statusNode.InnerText.Trim().ToLower().Contains("Draft".ToLower()))
-                {
-                    return TimeSheetStatus.Draft;
+                    Logger.Log("statusNode is null");
                 }
-                else if (statusNode.InnerText.Trim().ToLower().Contains("Submitted".ToLower()))
-                {
-                    return TimeSheetStatus.Submitted;
-                }
+
+            }
+            catch (Exception)
+            {
+                
                
             }
-            else
-            {
-                return TimeSheetStatus.None;
-                Logger.Log("statusNode is null");
-            }            
-
             return TimeSheetStatus.None;
         }
 

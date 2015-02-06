@@ -10,16 +10,31 @@ namespace AMSAPP
     {
         private string _comments;
 
+        private string _AMScomments;
 
+        public DateTime Date { get; set; }
         public string WeekDay { get; set; }
         
         public int Day { get; set; }
 
         public string Duration { get; set; }
 
+        public string AMScomments { set { _AMScomments = value; } }
+
         public string Comments { get
             {
-                return _comments;
+                if (!String.IsNullOrWhiteSpace(_comments))
+                {
+                    if (String.IsNullOrWhiteSpace(_AMScomments))
+                    {
+                        return  _comments;
+                    }else
+                    {
+                        return _AMScomments + Environment.NewLine + _comments;
+                    }
+                }
+
+                return _AMScomments;
             }
             set {
                 _comments = value;

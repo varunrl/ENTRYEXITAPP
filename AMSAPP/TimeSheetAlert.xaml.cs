@@ -39,8 +39,8 @@ namespace AMSAPP
             {
 
                     var image = AMSUtil.GetAvatar();
-
-                    avatar.Source = image;
+                    if(image != null)
+                        avatar.Source = image;
 
 
                 
