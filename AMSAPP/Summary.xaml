@@ -6,7 +6,7 @@
                       xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         Title="AMS App" Height="641" Width="550" Unloaded="Window_Unloaded" 
                      
-        GlowBrush="{DynamicResource AccentColorBrush}" ResizeMode="NoResize" Loaded="MetroWindow_Loaded" Closing="MetroWindow_Closing"              
+        GlowBrush="{DynamicResource AccentColorBrush}" ResizeMode="NoResize" Loaded="MetroWindow_Loaded" Closing="MetroWindow_Closing" IsVisibleChanged="MetroWindow_IsVisibleChanged"              
                       >
 
     <controls:MetroContentControl>

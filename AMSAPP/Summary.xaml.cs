@@ -50,6 +50,11 @@ namespace AMSAPP
 
         private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            //LoadSummary();
+        }
+
+        private void LoadSummary()
+        {
             try
             {
 
@@ -776,6 +781,14 @@ namespace AMSAPP
             e.Cancel = true;
             this.Visibility = Visibility.Hidden;
             ((App)Application.Current).SummaryWindowOpen = false;
+        }
+
+        private void MetroWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (((bool)e.NewValue))
+            {
+                LoadSummary();
+            }
         }
 
      
