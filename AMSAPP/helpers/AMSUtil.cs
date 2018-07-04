@@ -152,7 +152,7 @@ namespace AMSAPP
                     return Properties.Settings.Default.Avatar;
                 }
             }
-            var path = GetImagePath();
+            var path = Properties.Settings.Default.MySite+ Environment.UserDomainName + "\\" + Environment.UserName;
 
             if (path != null)
             {
@@ -207,7 +207,7 @@ namespace AMSAPP
                             var data = wc.DownloadString(new Uri(Properties.Settings.Default.MySite));
                             HtmlDocument doc1 = new HtmlDocument();
                             doc1.LoadHtml(data);
-                            var Node = doc1.DocumentNode.SelectSingleNode("//img[@class='ms-profile-image']");
+                            var Node = doc1.DocumentNode.SelectSingleNode("//img[@id='ctl00_PlaceHolderMain_PictureUrlImage']");
 
                             if(Node != null)
                             {

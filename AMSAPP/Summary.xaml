@@ -67,7 +67,7 @@
                             </DataGrid.RenderTransform>
                         </DataGrid>
                         <StackPanel Height="100"/>
-                        
+
                     </StackPanel>
                 </Grid>
             </TabItem>
@@ -94,6 +94,27 @@
                             <CheckBox x:Name="chkMonday" Content="Monday" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
 
                         </StackPanel>
+
+                        <GroupBox  Height="200" Header="Route Mentor">
+                            <Grid>
+                                <StackPanel Orientation="Vertical">
+                                    <Label Content="User Name"/>
+                                    <TextBox x:Name="RMUserName" Height="23"  Text="" TextChanged="RMUserName_TextChanged"/>
+                                    <Label Content="Password"/>
+                                    <PasswordBox x:Name="RMPassword" Height="23" PasswordChanged="RMPassword_PasswordChanged"  />
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Content="Login"/>
+                                        <xctk:TimePicker Height="30" Width="100" x:Name="RMLoginTime" ValueChanged="RMLoginTime_ValueChanged"/>
+                                        <Label Content="Logout" Margin="20,0" />
+                                        <xctk:TimePicker Height="30" Width="100" x:Name="RMLogoutTime" ValueChanged="RMLogoutTime_ValueChanged"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                        </GroupBox>
+
+
+
+
                     </StackPanel>
 
                 </Grid>

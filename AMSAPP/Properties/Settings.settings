@@ -29,8 +29,29 @@
     <Setting Name="AvatarRefreshTime" Type="System.DateTime" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="RouteMentorUserName" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="RouteMentorPassword" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="RouteMentorListUrl" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">https://www.routementor.com/fms/schedule/viewschedule.html</Value>
+    </Setting>
+    <Setting Name="RouteMentorAddUrl" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">https://www.routementor.com/fms/schedule/viewschedule.html</Value>
+    </Setting>
+    <Setting Name="RouteMentorLoginTime" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="RouteMentorLogoutTime" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
     <Setting Name="MySite" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">https://my.ey.net/Default.aspx</Value>
+      <Value Profile="(Default)">https://my.ey.net/_layouts/15/userphoto.aspx?size=L&amp;accountname=</Value>
+    </Setting>
+    <Setting Name="RouteMentorNoNeed" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
     </Setting>
   </Settings>
 </SettingsFile>

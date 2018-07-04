@@ -628,6 +628,12 @@ namespace AMSAPP
             lblMinHours.Content = TimeSpan.FromMinutes(Properties.Settings.Default.MinTimeSpan).ToString(); 
             sliderMinHours.Value = Properties.Settings.Default.MinTimeSpan;
 
+            RMUserName.Text = Properties.Settings.Default.RouteMentorUserName;
+            RMPassword.Password = Properties.Settings.Default.RouteMentorPassword;
+            
+            RMLoginTime.Value = Properties.Settings.Default.RouteMentorLoginTime;
+            RMLogoutTime.Value = Properties.Settings.Default.RouteMentorLogoutTime;
+
 
             SetCheckbox();
             
@@ -791,8 +797,29 @@ namespace AMSAPP
             }
         }
 
-     
-     
+        private void RMUserName_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            Properties.Settings.Default.RouteMentorUserName = RMUserName.Text.Trim();
+            Properties.Settings.Default.Save();
+        }
 
+        private void RMPassword_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.RouteMentorPassword = RMPassword.Password.Trim();
+            Properties.Settings.Default.RouteMentorNoNeed = "";
+            Properties.Settings.Default.Save();
+        }
+
+        private void RMLoginTime_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            Properties.Settings.Default.RouteMentorLoginTime = RMLoginTime.Value??DateTime.MinValue;
+            Properties.Settings.Default.Save();
+        }
+
+        private void RMLogoutTime_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            Properties.Settings.Default.RouteMentorLogoutTime = RMLogoutTime.Value ?? DateTime.MinValue;
+            Properties.Settings.Default.Save();
+        }
     }
 }

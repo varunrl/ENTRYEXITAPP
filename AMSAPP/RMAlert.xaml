@@ -1,0 +1,36 @@
+﻿<Window
+    x:Class="AMSAPP.RMAlertWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:AMSAPP"
+    xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+    xmlns:dxga="http://schemas.devexpress.com/winfx/2008/xaml/gauges"
+    Title="EY" Height="78.285" 
+    SnapsToDevicePixels="True" UseLayoutRounding="True" ResizeMode="CanMinimize" Topmost="True" AllowsTransparency="True" WindowStyle="None" Loaded="Window_Loaded" ShowInTaskbar="False"
+    Background="Transparent" Width="300">
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="Window.Loaded">
+            <BeginStoryboard>
+                <Storyboard >
+                    <DoubleAnimation x:Name="doubleAni" Duration="0:0:1" Storyboard.TargetProperty="Top" From="0" To="500" AccelerationRatio=".1"/>
+                    <DoubleAnimation Storyboard.TargetProperty="(UIElement.Opacity)" From="1.0" To="0.0" Duration="0:0:1" BeginTime="0:0:5" />
+                    <DoubleAnimation Storyboard.TargetProperty="(UIElement.Opacity)" From="0.0" To="1.0" Duration="0:0:1" BeginTime="0:0:6" />
+                    <DoubleAnimation Storyboard.TargetProperty="(UIElement.Opacity)" From="1.0" To="0.0" Duration="0:0:1" BeginTime="0:0:7" />
+                    <DoubleAnimation Storyboard.TargetProperty="(UIElement.Opacity)" From="0.0" To="1.0" Duration="0:0:1" BeginTime="0:0:8" />
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </Window.Triggers>
+    <Window.Resources>
+
+    </Window.Resources>
+    <Grid HorizontalAlignment="Center" Height="77"  VerticalAlignment="Top" Margin="0,0,0,0" Background="Black"  >
+        <Image x:Name="avatar" HorizontalAlignment="Left" Height="77" VerticalAlignment="Top" Width="80" RenderTransformOrigin="0.29,0.26" Source="Avatar/avatar.jpg" />
+        <TextBlock x:Name="TimesheetData" HorizontalAlignment="Center" VerticalAlignment="Center" Text="RM Request" Margin="85,0,0.4,25" Width="209" TextWrapping="Wrap" Height="52" Foreground="White"/>
+        <Button x:Name="btnCreate" Content="Create" HorizontalAlignment="Left" Margin="125,52,0,0" VerticalAlignment="Top" Width="75" Height="1" Click="btnCreate_Click" Visibility="Hidden" />
+        <Button x:Name="btnNoNeed" Content="No Need" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="205,51,0,0" Click="btnNoNeed_Click" Visibility="Hidden"/>
+
+    </Grid>
+
+
+</Window>

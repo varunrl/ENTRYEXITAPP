@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using AMSAPP.helpers;
 using Hardcodet.Wpf.TaskbarNotification;
 using Microsoft.Win32;
 
@@ -71,6 +72,42 @@ namespace AMSAPP
             
         }
 
+        private void RMAlert()
+        {
+            try
+            {
+                    var currentDate = RouteMentorHelper.checkRM();
+
+                    var logoutTime = AMSAPP.Properties.Settings.Default.RouteMentorLogoutTime;
+
+                    var logoutTimeSTring = logoutTime.ToString("HH:mm");
+                    if (currentDate != null  && currentDate.LogoutTime == logoutTimeSTring)
+                    {
+                        this.timesheetAlert = "Cab request found Login : " + currentDate.Login 
+                        +" LogOut : "+ currentDate.Logout;
+                        RMAlertWindow ts = new RMAlertWindow();
+                        AMSAPP.Properties.Settings.Default.RouteMentorNoNeed = DateTime.Now.ToString("yyyy-MM-dd");
+                        AMSAPP.Properties.Settings.Default.Save();
+                        ts.ShowDialog();
+                    }
+                    else
+                    {
+                        this.timesheetAlert = "Cab request not found"  ;
+                        RMAlertWindow ts = new RMAlertWindow();
+                        ts.btnCreate.Visibility = Visibility.Visible;
+                        ts.btnNoNeed.Visibility = Visibility.Visible;
+                        ts.ShowDialog();
+
+                    }
+                    
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log(ex.StackTrace);
+                }
+            
+        }
+
         private void TimsheetAlert()
         {
             var days = AMSUtil.GetTimesheetAlertWeeks();
@@ -82,7 +119,7 @@ namespace AMSAPP
                     if (result == TimeSheetStatus.None)
                     {
                         this.timesheetAlert = "Please submit Timesheet";
-                        TimesheetAlertWindow ts = new TimesheetAlertWindow();
+                        NewTimesheetAlertWindow ts = new NewTimesheetAlertWindow();
                         ts.ShowDialog();
                         //this.notifyIcon.ShowBalloonTip("TimeSheet", this.timesheetAlert, notifyIcon.Icon);
 
@@ -90,7 +127,7 @@ namespace AMSAPP
                     else if (result == TimeSheetStatus.Draft)
                     {
                         this.timesheetAlert = "Time Sheet in draft. Please submit";
-                        TimesheetAlertWindow ts = new TimesheetAlertWindow();
+                        NewTimesheetAlertWindow ts = new NewTimesheetAlertWindow();
                         ts.ShowDialog();
                         //this.notifyIcon.ShowBalloonTip("TimeSheet", this.timesheetAlert, notifyIcon.Icon);
                     }
@@ -138,6 +175,7 @@ namespace AMSAPP
 
                 SyncWithComputerEvents();
                 TimsheetAlert();
+                RMAlert();
             }
             catch (Exception exception)
             {
